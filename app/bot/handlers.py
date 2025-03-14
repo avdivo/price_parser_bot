@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .states import FileState
 from app.core.config import Config
 from app.services.data_processing import FileService
+from app.services.functions import get_price_and_save
+from app.db.crud import get_product_prices
 
 
 async def show_main_menu(message: types.Message):
@@ -85,6 +87,28 @@ async def handle_parser(message: types.Message, db: AsyncSession):
     :param db:
     :return:
     """
+    await message.answer(
+        "В зависимости от количества задач, процесс может потребовать длительного времени. Пожалуйста, ожидайте.")
+    answer = await get_price_and_save(db)
+    await message.answer(answer)
+
+
+async def viev_price(message: types.Message, db: AsyncSession):
+    """Вывод списка цен товаров
+    :param message:
+    :param db:
+    :return:
+    """
+    await message.answer("Список отслеживаемых ресурсов и цен по датам.")
+    result = await get_product_prices(db)
+    answer = ""
+    for title, dates in result.items():
+        answer += f"{title}\n"
+        for date, price in dates.items():
+            answer += f"{date} - {price / 100:.2f} ₽\n"
+        answer += "\n"
+
+    await message.answer(answer)
 
 
 async def handle_main_menu(message: types.Message, state: FSMContext):
@@ -144,7 +168,7 @@ def register_handlers(router):
     router.message.register(start_command, Command(commands=['start']))
     router.message.register(help_command, Command(commands=['help']))
     router.message.register(handle_main_menu, F.text.in_(["Добавить товары (загрузить файл)"]))
-    router.message.register(handle_main_menu, F.text.in_(["Парсинг цен"]))
-    router.message.register(handle_main_menu, F.text.in_(["Посмотреть цены"]))
+    router.message.register(handle_parser, F.text.in_(["Парсинг цен"]))
+    router.message.register(viev_price, F.text.in_(["Посмотреть цены"]))
     router.message.register(handle_get_file, StateFilter(FileState.send_file), F.content_type == 'document')
     router.message.register(handle_unknown_message)  # Обработчик по умолчанию

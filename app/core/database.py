@@ -24,7 +24,6 @@ class Base(AsyncAttrs, DeclarativeBase):
 # Создаем все таблицы, определенные в моделях
 async def create_tables():
     from app.models.models import ProductInfo, PriceScan
-    print('Создание ДЮ')
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
