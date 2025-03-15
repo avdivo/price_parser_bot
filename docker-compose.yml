@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    container_name: PriceParserBot
+    volumes:
+      - .:/code
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: always
+    ports:
+      - ${APP_PORTS}
