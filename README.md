@@ -37,6 +37,7 @@ GitHub: [https://github.com/avdivo/price_parser_bot.git](https://github.com/avdi
 
 ```plaintext
 ├── price_parser.bot/                 # Основной каталог проекта
+│   ├── .venv/                        # Виртуальное окружение
 │   ├── app/                          # Основной код приложения
 │   │   ├── api/                      # API-интерфейс
 │   │   │   ├── __init__.py           # Инициализация API
@@ -50,7 +51,6 @@ GitHub: [https://github.com/avdivo/price_parser_bot.git](https://github.com/avdi
 │   │   │   ├── config.py             # Конфигурационные настройки
 │   │   │   ├── config_bot.py         # Конфигурация бота
 │   │   │   ├── database.py           # Конфигурация базы данных
-│   │   ├── data/                     # Каталог для данных (загружаемые файлы)
 │   │   ├── db/                       # Каталог базы данных
 │   │   │   ├── __init__.py           # Инициализация базы данных
 │   │   │   ├── crud.py               # Операции работы с БД
@@ -63,14 +63,17 @@ GitHub: [https://github.com/avdivo/price_parser_bot.git](https://github.com/avdi
 │   │   │   ├── functions.py          # Обработка команд бота
 │   │   │   ├── parser.py             # Парсер данных
 │   │   ├── __init__.py               # Инициализация проекта
-│   │   ├── database.db               # Файл базы данных
 │   │   ├── main.py                   # Точка входа в приложение
-│   ├── venv/                         # Виртуальное окружение
+│   ├── data/                         # Каталог для данных (загружаемые файлы)
+│   ├── .python-version               # Версия Python
 │   ├── docker-compose.yml            # Файл конфигурации Docker Compose
 │   ├── Dockerfile                    # Файл сборки Docker
 │   ├── .env                          # Файл переменных окружения
+│   ├── database.db                   # Файл базы данных
+│   ├── pyproject.toml                # Файл конфигурации проекта uv
 │   ├── README.md                     # Документация проекта
-│   └── requirements.txt              # Зависимости проекта
+│   ├── requirements.txt              # Зависимости проекта для pip
+│   └── uv.lock                       # Управление зависимостями
 ```
 
 ## Используемые зависимости
@@ -106,24 +109,32 @@ APP_PORTS=80:8000
     ```bash
     git clone https://github.com/avdivo/price_parser_bot
     ```
-4. Войти в папку проекта.
+4. Перейти в папку проекта.
     ```bash
     cd price_parser_bot
     ```
-5. Создать и активировать виртуальное окружение
+5. Установить uv
     ```bash
-    python3 -m venv venv
-    source venv/bin/activate 
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   source ~/.bashrc
     ```
-6. Установить зависимости
+   Если curl не установлен
    ```bash
-    pip install -r requirements.txt 
-   ```
-7. 
-7. Запустить проект
-    ```bash
-    python manage.py runserver
+   sudo apt update
+   sudo apt install curl
     ```
+6. Установить зависимости и браузеры
+   ```bash
+   uv sync
+   uv run playwright install
+   ```
+7. Запустить приложение на 8000 порту
+   ```bash
+   uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+   ```
+   python -m app.main
+   ```
    
 ##  Запуск в Docker контейнере
 
@@ -131,11 +142,11 @@ APP_PORTS=80:8000
 2. Перейти в папку, где будет проект.
 3. Клонировать репозиторий:
     ```bash
-    git clone https://github.com/avdivo/yandex_file_manager
+    git clone https://github.com/avdivo/price_parser_bot
     ```
 4. Войти в папку проекта.
     ```bash
-    cd yandex_file_manager
+    cd price_parser_bot
     ```
 5. Запустить контейнер:
     ```bash
