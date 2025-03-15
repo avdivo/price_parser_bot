@@ -1,3 +1,4 @@
+import pytz
 from typing import List, Dict, Tuple
 from datetime import datetime, timezone
 from sqlalchemy.future import select
@@ -36,11 +37,12 @@ async def add_price_scan(session: AsyncSession, product: ProductInfo, price: int
     await session.commit()
 
 
-async def get_product_prices(session: AsyncSession) -> List[Tuple[str, str, Dict[str, int]]]:
+async def get_product_prices(session: AsyncSession, user_timezone: str = 'Europe/Moscow') -> List[Tuple[str, str, Dict[str, int]]]:
     """
     Асинхронно извлекает историю цен всех продуктов из базы данных.
 
     :param session: Асинхронная сессия SQLAlchemy.
+    :param user_timezone: Часовой пояс пользователя, например, 'Europe/Moscow'.
     :return: Список кортежей, где [0] - название продукта, [1] - url ресурса, а [2] - словарь {дата: цена},
              отсортированный по дате.
     """
@@ -48,9 +50,19 @@ async def get_product_prices(session: AsyncSession) -> List[Tuple[str, str, Dict
     result = await session.execute(stmt)
     products = result.scalars().all()
 
+    # Преобразование времени в часовой пояс пользователя
+    user_tz = pytz.timezone(user_timezone)
+
+    def convert_to_user_timezone(scan_time):
+        # Если scan_time наивное (без часового пояса), привязываем к UTC
+        if scan_time.tzinfo is None:
+            scan_time = scan_time.replace(tzinfo=timezone.utc)
+        # Преобразуем время в часовой пояс пользователя
+        return scan_time.astimezone(user_tz)
+
     return [(
         product.title, product.url, {
-            scan.scan_time.strftime("%d.%m.%Y %H:%M"): scan.price
+            convert_to_user_timezone(scan.scan_time).strftime("%d.%m.%Y %H:%M"): scan.price
             for scan in sorted(product.price_scans, key=lambda x: x.scan_time)
         })
         for product in products

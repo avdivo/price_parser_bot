@@ -1,9 +1,8 @@
-import random
 from typing import Union
 from playwright.async_api import async_playwright
 
 
-async def get_element_content(title: str, url: str, xpath: str) -> Union[str, None]:
+async def get_element_content(url: str, xpath: str) -> Union[str, None]:
     """
     Асинхронно извлекает содержимое элемента с указанной страницы по XPath.
 
@@ -30,9 +29,6 @@ async def get_element_content(title: str, url: str, xpath: str) -> Union[str, No
         })
 
         await page.goto(url, wait_until='domcontentloaded')
-        await page.wait_for_timeout(random.randint(1000, 1000))
-        # await page.evaluate('window.scrollTo(0, document.body.scrollHeight / 2)')
-        await page.mouse.move(random.randint(100, 500), random.randint(100, 500))
 
         try:
             element = await page.wait_for_selector(f'xpath={xpath}', timeout=20000)

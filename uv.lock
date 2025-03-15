@@ -477,6 +477,7 @@ dependencies = [
     { name = "pandas" },
     { name = "playwright" },
     { name = "python-dotenv" },
+    { name = "pytz" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
 ]
@@ -491,6 +492,7 @@ requires-dist = [
     { name = "pandas", specifier = "==2.2.3" },
     { name = "playwright", specifier = "==1.50.0" },
     { name = "python-dotenv", specifier = "==1.0.1" },
+    { name = "pytz", specifier = "==2025.1" },
     { name = "sqlalchemy", specifier = "==2.0.39" },
     { name = "uvicorn", specifier = "==0.34.0" },
 ]

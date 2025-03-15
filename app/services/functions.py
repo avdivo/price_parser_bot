@@ -49,7 +49,7 @@ async def get_price_and_save(session: AsyncSession) -> str:
         products = await get_all_products(session)
 
         # # Запуск всех запросов параллельно
-        tasks = [get_element_content(p.title, p.url, p.xpath) for p in products]
+        tasks = [get_element_content(p.url, p.xpath) for p in products]
         results = await asyncio.gather(*tasks)
 
         answer = ""

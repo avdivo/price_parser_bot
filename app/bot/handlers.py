@@ -90,6 +90,8 @@ async def handle_parser(message: types.Message, db: AsyncSession):
     await message.answer(
         "В зависимости от количества задач, процесс может потребовать длительного времени. Пожалуйста, ожидайте.")
     answer = await get_price_and_save(db)
+    if not answer:
+        answer = "Список пуст"
     await message.answer(answer, parse_mode="Markdown")
 
 
@@ -103,12 +105,20 @@ async def view_price(message: types.Message, db: AsyncSession):
     result = await get_product_prices(db)
     answer = ""
     for title, url, dates in result:
+        pre_answer = ""
         title = f"[{title}]({url})"
-        answer += f"{title}\n"
+        pre_answer += f"{title}\n"
         for date, price in dates.items():
-            answer += f"{date} - {price / 100:.2f} ₽\n"
-        answer += "\n"
+            pre_answer += f"{date} - {price / 100:.2f} ₽\n"
+        pre_answer += "\n"
 
+        if len(answer) + len(pre_answer) > 4096:
+            await message.answer(answer, parse_mode="Markdown")
+            answer = ""
+        answer += pre_answer
+
+    if not answer:
+        answer = "Список пуст"
     await message.answer(answer, parse_mode="Markdown")
 
 
