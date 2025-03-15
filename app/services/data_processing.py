@@ -3,9 +3,9 @@ import httpx
 import pandas as pd
 from aiogram import Bot
 from typing import List, Tuple
+from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException
 
 from app.models.models import ProductInfo
 
@@ -46,7 +46,6 @@ class FileService:
             else:
                 return None
 
-
     @staticmethod
     async def import_product_data(file_path: str, db: AsyncSession) -> Tuple[List[ProductInfo], int]:
         """
@@ -80,8 +79,7 @@ class FileService:
             missing_columns = [col for col in required_columns if col not in df.columns]
 
             if missing_columns:
-                raise HTTPException(
-                    status_code=400,
+                raise HTTPException(status_code=400,
                     detail=f"В таблице отсутствуют обязательные столбцы: {', '.join(missing_columns)}"
                 )
 

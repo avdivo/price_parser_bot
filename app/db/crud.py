@@ -1,8 +1,8 @@
+from typing import List, Dict, Tuple
 from datetime import datetime, timezone
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
-from typing import List, Dict
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.models import ProductInfo, PriceScan
 
@@ -36,21 +36,22 @@ async def add_price_scan(session: AsyncSession, product: ProductInfo, price: int
     await session.commit()
 
 
-async def get_product_prices(session: AsyncSession) -> Dict[str, Dict[str, int]]:
+async def get_product_prices(session: AsyncSession) -> List[Tuple[str, str, Dict[str, int]]]:
     """
     Асинхронно извлекает историю цен всех продуктов из базы данных.
 
     :param session: Асинхронная сессия SQLAlchemy.
-    :return: Словарь, где ключ - название продукта, а значение - словарь {дата: цена}, отсортированный по дате.
+    :return: Список кортежей, где [0] - название продукта, [1] - url ресурса, а [2] - словарь {дата: цена},
+             отсортированный по дате.
     """
     stmt = select(ProductInfo).options(selectinload(ProductInfo.price_scans))
     result = await session.execute(stmt)
     products = result.scalars().all()
 
-    return {
-        product.title: {
+    return [(
+        product.title, product.url, {
             scan.scan_time.strftime("%d.%m.%Y %H:%M"): scan.price
             for scan in sorted(product.price_scans, key=lambda x: x.scan_time)
-        }
+        })
         for product in products
-    }
+    ]

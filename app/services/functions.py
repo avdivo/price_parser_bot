@@ -1,13 +1,10 @@
+import re
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.crud import get_all_products, add_price_scan
 from app.services.parser import get_element_content
+from app.db.crud import get_all_products, add_price_scan
 
-
-import re
-
-import re
 
 def convert_price_to_kopecks(price_str: str) -> int:
     """
@@ -38,7 +35,6 @@ def convert_price_to_kopecks(price_str: str) -> int:
         return 0
 
 
-
 async def get_price_and_save(session: AsyncSession) -> str:
     """
     С помощью функции получает все записи из таблицы ProductInfo.
@@ -60,9 +56,9 @@ async def get_price_and_save(session: AsyncSession) -> str:
         for product, content in zip(products, results):
             price = convert_price_to_kopecks(content)
             await add_price_scan(session, product, price)  # Сохраняем цены в БД
-            answer += f"{product.title}\n  Цена: {price / 100:.2f} ₽\n"
+            title = f"[{product.title}]({product.url})"
+            answer += f"{title}\n  Цена: {price / 100:.2f} ₽\n"
     except:
         answer = "Извините. Произошла ошибка. Повторите позже."
 
     return answer
-

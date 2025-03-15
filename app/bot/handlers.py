@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .states import FileState
 from app.core.config import Config
+from app.db.crud import get_product_prices
 from app.services.data_processing import FileService
 from app.services.functions import get_price_and_save
-from app.db.crud import get_product_prices
 
 
 async def show_main_menu(message: types.Message):
@@ -53,7 +53,7 @@ async def handle_get_file(message: types.Message, db: AsyncSession, state: FSMCo
 
             # Загрузка файла
             success = await FileService.download_file(message.bot, file_path,
-                                                      f'{Config.FILE_PATH}/{message.document.file_name}')
+                            f'{Config.FILE_PATH}/{message.document.file_name}')
             if success:
                 await message.answer(f"Обработка файла...")
 
@@ -90,10 +90,10 @@ async def handle_parser(message: types.Message, db: AsyncSession):
     await message.answer(
         "В зависимости от количества задач, процесс может потребовать длительного времени. Пожалуйста, ожидайте.")
     answer = await get_price_and_save(db)
-    await message.answer(answer)
+    await message.answer(answer, parse_mode="Markdown")
 
 
-async def viev_price(message: types.Message, db: AsyncSession):
+async def view_price(message: types.Message, db: AsyncSession):
     """Вывод списка цен товаров
     :param message:
     :param db:
@@ -102,13 +102,14 @@ async def viev_price(message: types.Message, db: AsyncSession):
     await message.answer("Список отслеживаемых ресурсов и цен по датам.")
     result = await get_product_prices(db)
     answer = ""
-    for title, dates in result.items():
+    for title, url, dates in result:
+        title = f"[{title}]({url})"
         answer += f"{title}\n"
         for date, price in dates.items():
             answer += f"{date} - {price / 100:.2f} ₽\n"
         answer += "\n"
 
-    await message.answer(answer)
+    await message.answer(answer, parse_mode="Markdown")
 
 
 async def handle_main_menu(message: types.Message, state: FSMContext):
@@ -144,6 +145,7 @@ async def help_command(message: types.Message):
 
 Чтобы обновить информацию о ценах отслеживаемых товаров, нажмите кнопку "Парсинг цен".
 Я сбегаю на сайты и запишу что у них теперь с ценами.
+Иногда ответ получить не удается, тогда в цену товара записывается 0.
 
 Если хотите посмотреть цены, нажмите кнопку "Посмотреть цены".
 Я выведу список дат и цен, которые собирались при нажатии кнопки "Парсинг цен" для каждого товара.
@@ -169,6 +171,6 @@ def register_handlers(router):
     router.message.register(help_command, Command(commands=['help']))
     router.message.register(handle_main_menu, F.text.in_(["Добавить товары (загрузить файл)"]))
     router.message.register(handle_parser, F.text.in_(["Парсинг цен"]))
-    router.message.register(viev_price, F.text.in_(["Посмотреть цены"]))
+    router.message.register(view_price, F.text.in_(["Посмотреть цены"]))
     router.message.register(handle_get_file, StateFilter(FileState.send_file), F.content_type == 'document')
     router.message.register(handle_unknown_message)  # Обработчик по умолчанию

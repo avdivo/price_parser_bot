@@ -1,7 +1,7 @@
-import asyncio
-from typing import Union, Tuple
-from playwright.async_api import async_playwright
 import random
+from typing import Union
+from playwright.async_api import async_playwright
+
 
 async def get_element_content(title: str, url: str, xpath: str) -> Union[str, None]:
     """
@@ -40,7 +40,5 @@ async def get_element_content(title: str, url: str, xpath: str) -> Union[str, No
             await browser.close()
             return content
         except Exception as e:
-            html = await page.content()
-            # print(f"Page snippet: {html[:500]}...")
             await browser.close()
             return str(e)

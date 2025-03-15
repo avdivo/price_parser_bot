@@ -1,13 +1,13 @@
 import asyncio
 
-from fastapi import APIRouter, Request, Depends
-from fastapi.responses import JSONResponse
 from aiogram.types import Update
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Config
-from app.core.config_bot import bot, dp
 from app.core.database import get_db
+from app.core.config_bot import bot, dp
 
 webhook_router = APIRouter()
 
