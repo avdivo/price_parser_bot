@@ -23,7 +23,7 @@ async def show_main_menu(message: types.Message):
                 types.KeyboardButton(text="Добавить товары (загрузить файл)"),
             ],
             [
-                types.KeyboardButton(text="Парсинг цен"),
+                types.KeyboardButton(text="Получить цены"),
             ],
             [
                 types.KeyboardButton(text="Посмотреть цены"),
@@ -143,12 +143,12 @@ async def help_command(message: types.Message):
 
 4. После обработки я добавлю выбранные товары в список отслеживания.
 
-Чтобы обновить информацию о ценах отслеживаемых товаров, нажмите кнопку "Парсинг цен".
+Чтобы обновить информацию о ценах отслеживаемых товаров, нажмите кнопку "Получить цены".
 Я сбегаю на сайты и запишу что у них теперь с ценами.
 Иногда ответ получить не удается, тогда в цену товара записывается 0.
 
 Если хотите посмотреть цены, нажмите кнопку "Посмотреть цены".
-Я выведу список дат и цен, которые собирались при нажатии кнопки "Парсинг цен" для каждого товара.
+Я выведу список дат и цен, которые собирались при нажатии кнопки "Получить цены" для каждого товара.
 
 Доступные команды:
 /start - Начать работу с ботом.
@@ -170,7 +170,7 @@ def register_handlers(router):
     router.message.register(start_command, Command(commands=['start']))
     router.message.register(help_command, Command(commands=['help']))
     router.message.register(handle_main_menu, F.text.in_(["Добавить товары (загрузить файл)"]))
-    router.message.register(handle_parser, F.text.in_(["Парсинг цен"]))
+    router.message.register(handle_parser, F.text.in_(["Получить цены"]))
     router.message.register(view_price, F.text.in_(["Посмотреть цены"]))
     router.message.register(handle_get_file, StateFilter(FileState.send_file), F.content_type == 'document')
     router.message.register(handle_unknown_message)  # Обработчик по умолчанию
