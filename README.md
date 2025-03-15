@@ -113,6 +113,7 @@ APP_PORTS=80:8000
     ```bash
     cd price_parser_bot
     ```
+   > Не забыть поместить или создать в папке файл .env
 5. Установить uv
     ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -148,6 +149,7 @@ APP_PORTS=80:8000
     ```bash
     cd price_parser_bot
     ```
+   > Не забыть поместить или создать в папке файл .env
 5. Запустить контейнер:
     ```bash
     docker compose up
