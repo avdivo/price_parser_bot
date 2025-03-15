@@ -52,11 +52,6 @@ async def get_price_and_save(session: AsyncSession) -> str:
         tasks = [get_element_content(p.title, p.url, p.xpath) for p in products]
         results = await asyncio.gather(*tasks)
 
-        # Открываем файл для записи
-        with open('price.log', 'w') as file:
-            for res in results:
-                file.write(f"{res}\n")
-
         answer = ""
         for product, content in zip(products, results):
             price = convert_price_to_kopecks(content)

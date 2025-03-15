@@ -129,6 +129,9 @@ APP_PORTS=80:8000
    uv sync
    uv run playwright install
    ```
+   ```bash
+   uv run playwright install-deps
+   ```
 7. Запустить приложение на 8000 порту
    ```bash
    uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

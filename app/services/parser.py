@@ -35,7 +35,7 @@ async def get_element_content(title: str, url: str, xpath: str) -> Union[str, No
         await page.mouse.move(random.randint(100, 500), random.randint(100, 500))
 
         try:
-            element = await page.wait_for_selector(f'xpath={xpath}', timeout=5000)
+            element = await page.wait_for_selector(f'xpath={xpath}', timeout=10000)
             content = await element.text_content()
             await browser.close()
             return content
