@@ -53,18 +53,25 @@ async def handle_get_file(message: types.Message, db: AsyncSession, state: FSMCo
 
             # Загрузка файла
             success = await FileService.download_file(message.bot, file_path,
-                            f'{Config.FILE_PATH}/{message.document.file_name}')
+                                                      f'{Config.FILE_PATH}/{message.document.file_name}')
             if success:
                 await message.answer(f"Обработка файла...")
 
                 try:
                     # Получение данных из файла и сохранение в БД
                     res = await FileService.import_product_data(success, db)
-                    await message.answer(f"Импортировано {res[1]} товаров")
+
                     answer = ""
                     for product in res[0]:
-                        answer += f"Название:\n{product.title}\n\nurl:\n{product.url}\n\nxpath:\n{product.xpath}\n\n"
+                        pre_answer = f"Название:\n{product.title}\n\nurl:\n{product.url}\n\nxpath:\n{product.xpath}\n\n"
+
+                        if len(answer) + len(pre_answer) > 4096:
+                            await message.answer(answer)
+                            answer = ""
+                        answer += pre_answer
+                    print(answer)
                     await message.answer(answer)
+                    await message.answer(f"\nИмпортировано {res[1]} товаров")
 
                 except HTTPException as e:
                     await message.answer(e.detail)
@@ -89,10 +96,8 @@ async def handle_parser(message: types.Message, db: AsyncSession):
     """
     await message.answer(
         "В зависимости от количества задач, процесс может потребовать длительного времени. Пожалуйста, ожидайте.")
-    answer = await get_price_and_save(db)
-    if not answer:
-        answer = "Список пуст"
-    await message.answer(answer, parse_mode="Markdown")
+    async for answer in get_price_and_save(db):
+        await message.answer(answer, parse_mode="Markdown", disable_web_page_preview=True)
 
 
 async def view_price(message: types.Message, db: AsyncSession):
@@ -113,13 +118,13 @@ async def view_price(message: types.Message, db: AsyncSession):
         pre_answer += "\n"
 
         if len(answer) + len(pre_answer) > 4096:
-            await message.answer(answer, parse_mode="Markdown")
+            await message.answer(answer, parse_mode="Markdown", disable_web_page_preview=True)
             answer = ""
         answer += pre_answer
 
     if not answer:
         answer = "Список пуст"
-    await message.answer(answer, parse_mode="Markdown")
+    await message.answer(answer, parse_mode="Markdown", disable_web_page_preview=True)
 
 
 async def handle_main_menu(message: types.Message, state: FSMContext):

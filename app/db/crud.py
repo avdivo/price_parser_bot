@@ -1,5 +1,5 @@
 import pytz
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Sequence
 from datetime import datetime, timezone
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.models import ProductInfo, PriceScan
 
 
-async def get_all_products(session: AsyncSession) -> List[ProductInfo]:
+async def get_all_products(session: AsyncSession) -> Sequence[ProductInfo]:
     """
     Асинхронно получает все записи из таблицы ProductInfo.
 
@@ -37,7 +37,8 @@ async def add_price_scan(session: AsyncSession, product: ProductInfo, price: int
     await session.commit()
 
 
-async def get_product_prices(session: AsyncSession, user_timezone: str = 'Europe/Moscow') -> List[Tuple[str, str, Dict[str, int]]]:
+async def get_product_prices(session: AsyncSession, user_timezone: str = 'Europe/Moscow') -> List[
+    Tuple[str, str, Dict[str, int]]]:
     """
     Асинхронно извлекает историю цен всех продуктов из базы данных.
 

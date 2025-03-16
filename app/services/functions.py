@@ -1,10 +1,9 @@
 import re
 import asyncio
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.parser import get_element_content
 from app.db.crud import get_all_products, add_price_scan
-
+from app.models.models import ProductInfo
 
 def convert_price_to_kopecks(price_str: str) -> int:
     """
@@ -35,30 +34,42 @@ def convert_price_to_kopecks(price_str: str) -> int:
         return 0
 
 
-async def get_price_and_save(session: AsyncSession) -> str:
-    """
-    С помощью функции получает все записи из таблицы ProductInfo.
-    Запускает получение цен для каждого объекта.
-    Обрабатывает и пересчитывает цену в копейки.
-    Передает в функцию для сохранения в БД.
+# Вспомогательная функция-обёртка
+async def wrapped_task(product: ProductInfo, semaphore: asyncio.Semaphore) -> tuple:
+    result = await get_element_content(product.url, product.xpath, semaphore)
+    return product, result
 
-    :param session: Асинхронная сессия для взаимодействия с базой данных.
-    :return: список с названий и цен в виде текста.
-    """
+
+async def get_price_and_save(session, max_concurrent_tasks: int = 10):
     try:
-        products = await get_all_products(session)
+        products = await get_all_products(session)  # Получаем список товаров
+        semaphore = asyncio.Semaphore(max_concurrent_tasks)  # Создаём семафор
 
-        # # Запуск всех запросов параллельно
-        tasks = [get_element_content(p.url, p.xpath) for p in products]
-        results = await asyncio.gather(*tasks)
+        # Создаём список пар (task, product)
+        tasks = [asyncio.create_task(wrapped_task(p, semaphore)) for p in products]
 
+        count = 10  # Счетчик количества строк вывода
         answer = ""
-        for product, content in zip(products, results):
+        # Используем as_completed для обработки результатов по мере их готовности
+        for task in asyncio.as_completed(tasks):
+            product, content = await task  # Получаем результат текущей задачи
+
+            # Обработка и сохранение результата
             price = convert_price_to_kopecks(content)
-            await add_price_scan(session, product, price)  # Сохраняем цены в БД
+            await add_price_scan(session, product, price)
             title = f"[{product.title}]({product.url})"
             answer += f"{title}\n  Цена: {price / 100:.2f} ₽\n"
-    except:
-        answer = "Извините. Произошла ошибка. Повторите позже."
 
-    return answer
+            count -= 1
+            if count == 0:
+                answer += "\nПродолжение следует..."
+                yield answer
+                answer = ""
+                count = 10
+
+
+    except Exception as e:
+        answer = f"Извините. Произошла ошибка: {str(e)}"
+
+    answer += "\nКонец списка."
+    yield answer
