@@ -137,7 +137,7 @@ APP_PORTS=80:8000
    uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
    ```
-   python -m app.main
+   uv run uvicorn app.main:app --host 0.0.0.0 --port 80 --reload > uvicorn.log 2>&1 &
    ```
    
 ##  Запуск в Docker контейнере
