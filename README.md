@@ -3,8 +3,7 @@
 
 Телеграмм бот: [@avdivoPriceParser_bot](https://t.me/avdivoPriceParser_bot)  
 GitHub: [https://github.com/avdivo/price_parser_bot.git](https://github.com/avdivo/price_parser_bot.git)  
-Тестовый файл: [test.xlsx](https://rawcdn.githack.com/avdivo/price_parser_bot/0aad70b2ee17df9d4f022008ad383f45dafcfca8/app/data/test.xlsx)
-
+Тестовый файл: [test.xlsx](https://rawcdn.githack.com/avdivo/price_parser_bot/ac8d2fbeae5257fe1d71cbfd5b603ed04d632273/data/test.xlsx)
 
 ## Описание
 Телеграм бот для наблюдения за ценами на выбранных ресурсах
