@@ -69,7 +69,7 @@ async def handle_get_file(message: types.Message, db: AsyncSession, state: FSMCo
                             await message.answer(answer)
                             answer = ""
                         answer += pre_answer
-                    print(answer)
+
                     await message.answer(answer)
                     await message.answer(f"\nИмпортировано {res[1]} товаров")
 
@@ -110,9 +110,8 @@ async def view_price(message: types.Message, db: AsyncSession):
     result = await get_product_prices(db)
     answer = ""
     for title, url, dates in result:
-        pre_answer = ""
         title = f"[{title}]({url})"
-        pre_answer += f"{title}\n"
+        pre_answer = f"{title}\n"
         for date, price in dates.items():
             pre_answer += f"{date} - {price / 100:.2f} ₽\n"
         pre_answer += "\n"
