@@ -6,8 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .states import FileState
 from app.core.config import Config
-from app.db.crud import get_product_prices
 from app.services.data_processing import FileService
+from app.db.crud import get_product_prices, clear_tables
 from app.services.functions import get_price_and_save
 
 
@@ -126,6 +126,15 @@ async def view_price(message: types.Message, db: AsyncSession):
     await message.answer(answer, parse_mode="Markdown", disable_web_page_preview=True)
 
 
+async def clear_db(message: types.Message, db: AsyncSession):
+    """Очистка БД
+    :param message:
+    :param db:
+    :return:
+    """
+    await message.answer(await clear_tables(db))
+
+
 async def handle_main_menu(message: types.Message, state: FSMContext):
     """Обработка нажатий на кнопки главного меню
     :param message:
@@ -167,6 +176,7 @@ async def help_command(message: types.Message):
 Доступные команды:
 /start - Начать работу с ботом.
 /help - Показать эту справку.
+/clear - Очистить базу данных.
 """
     await message.answer(help_text)
 
@@ -183,6 +193,7 @@ def register_handlers(router):
     """
     router.message.register(start_command, Command(commands=['start']))
     router.message.register(help_command, Command(commands=['help']))
+    router.message.register(clear_db, Command(commands=['clear']))
     router.message.register(handle_main_menu, F.text.in_(["Добавить товары (загрузить файл)"]))
     router.message.register(handle_parser, F.text.in_(["Получить цены"]))
     router.message.register(view_price, F.text.in_(["Посмотреть цены"]))

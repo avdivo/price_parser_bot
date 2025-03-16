@@ -1,11 +1,13 @@
 import pytz
 from typing import List, Dict, Tuple, Sequence
 from datetime import datetime, timezone
+from sqlalchemy import delete
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.models import ProductInfo, PriceScan
+from app.core.database import engine, Base
 
 
 async def get_all_products(session: AsyncSession) -> Sequence[ProductInfo]:
@@ -68,3 +70,26 @@ async def get_product_prices(session: AsyncSession, user_timezone: str = 'Europe
         })
         for product in products
     ]
+
+
+async def clear_tables(session: AsyncSession) -> str:
+    """
+    Удаляет все записи из таблиц ProductInfo и PriceScan.
+
+    :param session: Асинхронная сессия для взаимодействия с базой данных.
+    """
+    try:
+        pass
+        # Удаляем все таблицы
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+
+        # Создаем все таблицы заново
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        await session.rollback()
+        return f"Произошла ошибка при удалении записей: {e}"
+    finally:
+        await session.close()
+        return "База данных очищена"
