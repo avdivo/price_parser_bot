@@ -55,6 +55,7 @@ async def get_price_and_save(session, max_concurrent_tasks: int = 10):
             product, content = await task  # Получаем результат текущей задачи
 
             # Обработка и сохранение результата
+            print(content)
             price = convert_price_to_kopecks(content)
             await add_price_scan(session, product, price)
             title = f"[{product.title}]({product.url})"
